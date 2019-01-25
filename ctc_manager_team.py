@@ -11,21 +11,33 @@ def get_token():
     return token_json[0]['token']
 
 
-def get_data(function):
-    """Get Json Data"""
+def get_data(**data):
+    """Get Json Data from Moodle"""
     domain = 'https://ead.puc-rio.br'
-    token = get_token()
-    serverurl = domain + '/webservice/rest/server.php'+'?wstoken=' + \
-        token+'&wsfunction='+function+'&moodlewsrestformat=json'
-    course_id = 16358
-    groups = requests.post(serverurl, data={'courseid': course_id})
 
-    return groups.json()
+    serverurl = domain + '/webservice/rest/server.php'+'?wstoken=' + \
+        data['token']+'&wsfunction=' + \
+        data['function']+'&moodlewsrestformat=json'
+
+    param_request = {}
+    for key, value in data.items():
+        if key.endswith('ids'):
+            param_request[key] = value
+
+    response = requests.post(serverurl, data={'cohortids': [{'cohortids': 5}]})
+
+    print(response.json())
+
+    # return groups.json()
 
 
 def main():
-    response = get_data('core_group_get_course_groups')
-    print response
+    token = get_token()
+    members = get_data(
+        token=token, function='core_cohort_get_cohort_members', cohortids=5)
+
+    # courses = get_data('core_course_get_courses_by_field')
+    # enrol(course,menbers)
 
 
 if __name__ == '__main__':
